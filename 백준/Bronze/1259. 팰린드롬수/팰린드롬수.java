@@ -8,7 +8,7 @@ public class Main {
    public static void main(String[] args) throws IOException {
        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-       while (true) {
+       while (true) { //입력의 맨 마지막 줄에는 0이 주어지기 때문에 0이 들어올때까지 계속 무한루프
            String str = br.readLine();
 
            StringBuffer stb = new StringBuffer(str);
