@@ -6,7 +6,6 @@ import java.util.*;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        //Scanner 보다 BufferedReader 속도가 빠름
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringBuilder sb = new StringBuilder();
 
@@ -17,7 +16,7 @@ public class Main {
             list.add(Integer.parseInt(br.readLine()));
         }
 
-        Collections.sort(list); //Arrays.sort 사용했다가 시간초과 에러 났음
+        Collections.sort(list);
 
         for(Integer n : list) {
             sb.append(n).append("\n");
