@@ -2,90 +2,76 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.LinkedList;
-import java.util.Deque;
+import java.util.Queue;
 import java.util.StringTokenizer;
 
 public class Main {
+    static int N;
+    static int M;
+    static int[][] box;
+    static int[] dx = {0, 0, 1, -1}; // 상하좌우 이동
+    static int[] dy = {1, -1, 0, 0}; // 상하좌우 이동
 
-	static boolean[][] check;
-	static int[][] arr;
-	static int[] moveX = {0, 0, 1, -1};
-	static int[] moveY = {1, -1, 0, 0};
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        N = Integer.parseInt(st.nextToken());
+        M = Integer.parseInt(st.nextToken());
 
-	static int count = 0,ans = Integer.MIN_VALUE;
-	static Deque<spot> q = new LinkedList<>();
+        box = new int[M][N]; // 토마토 넣을 박스
+        Queue<Point> ripe = new LinkedList<>(); // 익은 토마토 위치 큐
+        int day = 0; // 일수
 
-	
-	static int N, M;
-	static StringBuilder sb = new StringBuilder();
-
-	public static void main(String[] args) throws IOException {
-		
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));		
-		
-		StringTokenizer st = new StringTokenizer(br.readLine());
-		
-		N = Integer.parseInt(st.nextToken());
-		M = Integer.parseInt(st.nextToken());
-		
-		arr = new int[M][N];
-		check = new boolean[M][N];
-		
-		for(int i = 0 ; i < M ; i++) {
-			StringTokenizer str = new StringTokenizer(br.readLine());
-			
-			for(int j = 0 ; str.hasMoreTokens() ; j++) {
-				arr[i][j] = Integer.parseInt(str.nextToken());
-				if(arr[i][j] == 1)
-					q.add(new spot(i,j));
-			}
-		}
-		 bfs();
-		loop : for(int i = 0 ; i < M ; i++) {
-			for(int j = 0 ; j < N ; j++) {
-				//System.out.print(arr[i][j] + " ");
-				if(arr[i][j] == 0) {
-					ans = 0;
-					break loop;
-				}else
-					ans = Math.max(ans, arr[i][j]);
-		}
-		}
-		
-			System.out.println(ans-1);
-		}
-
-	public static void bfs() {
-		
-		while(!q.isEmpty()) {
-			spot s = q.poll();
-			for (int i = 0; i < 4; i++) {
-                int nextX = s.x + moveX[i];
-                int nextY = s.y + moveY[i];
-                
-                if (nextX < 0 || nextY < 0 || nextX >= M || nextY >= N) {
-                    continue;
-                }
-                if (check[nextX][nextY] || arr[nextX][nextY] < 0) {
-                    continue;
-                }
-                
-                q.add(new spot(nextX, nextY));
-                if(arr[nextX][nextY] == 0)
-                	arr[nextX][nextY] = arr[s.x][s.y] + 1;
-                else
-                	arr[nextX][nextY] = Math.min(arr[s.x][s.y] + 1, arr[nextX][nextY]);
-                
-                check[nextX][nextY] = true;
+        // 배열 값 세팅
+        for (int i = 0; i < M; i++) {
+            st = new StringTokenizer(br.readLine());
+            for (int j = 0; j < N; j++) {
+                box[i][j] = Integer.parseInt(st.nextToken());
+                if (box[i][j] == 1) ripe.offer(new Point(i, j, 0)); // 익은 토마토의 위치 큐에 저장
             }
-		}
-	}
-}
-class spot{
-	int x;
-	int y;
-	spot(int x, int  y){
-		this.x = x;
-		this.y = y;
-	}
+        }
+
+        while (!ripe.isEmpty()) {
+            Point p = ripe.poll();
+            day = p.day;
+
+            for (int i = 0; i < 4; i++) {
+                int nx = p.x + dx[i];
+                int ny = p.y + dy[i];
+
+                if (nx < 0 || nx >= M || ny < 0 || ny >= N) continue; // 범위 체크
+
+                if (box[nx][ny] == 0) { // 익지 않은 토마토가 있다면 익힘
+                    box[nx][ny] = 1;
+                    ripe.offer(new Point(nx, ny, p.day + 1));
+                }
+            }
+        }
+
+        if (checkAllRipe()) // 모든 토마토가 익었는지 체크
+            System.out.println(day);
+        else
+            System.out.println(-1);
+    }
+
+    // 모든 토마토가 익었는지 체크하는 함수
+    static boolean checkAllRipe() {
+        for (int i = 0; i < M; i++) {
+            for (int j = 0; j < N; j++) {
+                if (box[i][j] == 0) // 익지 않은 토마토가 있다면
+                    return false;
+            }
+        }
+        return true; // 모든 토마토가 익었다면
+    }
+
+    static class Point {
+        int x, y, day;
+
+        Point(int x, int y, int day) {
+            this.x = x;
+            this.y = y;
+            this.day = day;
+        }
+    }
 }
