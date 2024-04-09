@@ -1,80 +1,104 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.StringTokenizer;
 
 public class Main {
+    static int[][] map;
+    static int[][] distance;
+    static boolean[][] visited;
+    static int n, m;
+    static final int INF = Integer.MAX_VALUE;
+    static final int[] dx = {-1, 1, 0, 0};
+    static final int[] dy = {0, 0, -1, 1};
 
-	static int[][] dp;
-	static int[] dx = { 1, -1, 0, 0 };
-	static int[] dy = { 0, 0, 1, -1 };
+    static class Point {
+        int x, y;
 
-	static class Dot {
-		int x, y;
+        Point(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
 
-		Dot(int x, int y) {
-			this.x = x;
-			this.y = y;
-		}
-	}
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        n = Integer.parseInt(st.nextToken());
+        m = Integer.parseInt(st.nextToken());
 
-	public static void main(String[] args) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringTokenizer st = new StringTokenizer(br.readLine());
-		int a = Integer.parseInt(st.nextToken());
-		int b = Integer.parseInt(st.nextToken());
-		int[][] arr = new int[a][b];
-		boolean[][] checked = new boolean[a][b];
-		dp = new int[a][b];
-		for (int i = 0; i < a; i++) {
-			for (int j = 0; j < b; j++) {
-				dp[i][j] = Integer.MAX_VALUE;
-			}
-		}
-		Queue<Dot> q = new LinkedList<>();
-		for (int i = 0; i < a; i++) {
-			st = new StringTokenizer(br.readLine());
-			for (int j = 0; j < b; j++) {
-				arr[i][j] = Integer.parseInt(st.nextToken());
-				if (arr[i][j] == 2) {
-					dp[i][j] = 0;
-					q.add(new Dot(i, j));
-					checked[i][j]=true;
-				}
-			}
-		}
+        map = new int[n][m];
+        distance = new int[n][m];
+        visited = new boolean[n][m];
 
-		while (!q.isEmpty()) {
-			Dot d=q.poll();
-			int x= d.x;
-			int y=d.y;
-			for(int i=0;i<4;i++) {
-				int xx= x+dx[i];
-				int yy= y+dy[i];
-				if(xx<0||yy<0||xx>=a||yy>=b||checked[xx][yy]) continue;
-				if(arr[xx][yy]==1){
-					checked[xx][yy]=true;
-					dp[xx][yy]=dp[x][y]+1;
-					q.add(new Dot(xx,yy));
-				}
-			}
-		}
+        // 도시 정보 입력
+        for (int i = 0; i < n; i++) {
+            st = new StringTokenizer(br.readLine());
+            for (int j = 0; j < m; j++) {
+                map[i][j] = Integer.parseInt(st.nextToken());
+                if (map[i][j] == 2) {
+                    distance[i][j] = 0; // 시작 지점
+                } else {
+                    distance[i][j] = INF; // 시작 지점 이외의 지점은 최대값으로 설정
+                }
+            }
+        }
 
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < a; i++) {
-			for (int j = 0; j < b; j++) {
-				if(arr[i][j]==0) sb.append(0).append(" ");
-				else if(!checked[i][j]&&arr[i][j]==1) {
-					sb.append(-1).append(" ");
-				}else 
-					sb.append(dp[i][j]).append(" ");
-			}
-			sb.append("\n");
-		}
+        // BFS 수행
+        bfs();
 
-		System.out.println(sb);
-	}
+        // 결과 출력
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (map[i][j] == 0) { // 벽인 경우
+                    sb.append("0 ");
+                } else if (distance[i][j] == INF) { // 도달할 수 없는 경우
+                    sb.append("-1 ");
+                } else { // 최단 거리 출력
+                    sb.append(distance[i][j]).append(" ");
+                }
+            }
+            sb.append("\n");
+        }
+        System.out.println(sb);
+    }
 
+    static void bfs() {
+        Queue<Point> queue = new ArrayDeque<>();
+        
+        // 시작 지점을 큐에 추가
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (map[i][j] == 2) {
+                    queue.offer(new Point(i, j));
+                    visited[i][j] = true;
+                }
+            }
+        }
+
+        while (!queue.isEmpty()) {
+            Point current = queue.poll();
+            int x = current.x;
+            int y = current.y;
+
+            // 상하좌우 이동
+            for (int i = 0; i < 4; i++) {
+                int nx = x + dx[i];
+                int ny = y + dy[i];
+
+                // 범위를 벗어난 경우 무시
+                if (nx < 0 || ny < 0 || nx >= n || ny >= m) continue;
+                
+                // 벽이거나 이미 방문한 경우 무시
+                if (map[nx][ny] == 0 || visited[nx][ny]) continue;
+
+                visited[nx][ny] = true;
+                distance[nx][ny] = distance[x][y] + 1;
+                queue.offer(new Point(nx, ny));
+            }
+        }
+    }
 }
